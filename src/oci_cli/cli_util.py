@@ -283,15 +283,29 @@ def get_instance_principal_signer(ctx, client_config):
             delegation_token = None
             delegation_token_location = client_config.get('delegation_token_file')
             if delegation_token_location is None:
-                raise ValueError('ERROR: Please specify the location of the delegation_token_file in the config.')
+                raise ValueError('ERROR: delegation_token_file not specified in config.\n'
+                                'Please add the following to your ~/.oci/config under your profile:\n'
+                                '  delegation_token_file=/path/to/your/delegation_token\n'
+                                'Example:\n'
+                                '  [DEFAULT]\n'
+                                '  delegation_token_file=~/.oci/delegation_token')
             expanded_delegation_token_location = os.path.expanduser(delegation_token_location)
             if not os.path.exists(expanded_delegation_token_location):
-                raise IOError("ERROR: delegation_token_file not found at " + expanded_delegation_token_location)
+                raise IOError("ERROR: delegation_token_file not found at {}\n"
+                             "Please ensure:\n"
+                             "  1. The file exists at the specified location\n"
+                             "  2. You have read permissions (chmod 600 {})\n"
+                             "  3. The path is correct in your config file".format(
+                                 expanded_delegation_token_location, expanded_delegation_token_location))
             with open(expanded_delegation_token_location, 'r') as delegation_token_file:
                 delegation_token = delegation_token_file.read().strip()
             signer_kwargs['delegation_token'] = delegation_token
             if delegation_token is None:
-                raise ValueError('ERROR: delegation_token was not provided.')
+                raise ValueError('ERROR: delegation_token is empty or not provided.\n'
+                                'Please ensure the delegation token file contains a valid token.\n'
+                                'To generate a new delegation token:\n'
+                                '  1. Check your IAM policies allow delegation\n'
+                                '  2. Generate a new token using the appropriate service')
             signer = oci.auth.signers.InstancePrincipalsDelegationTokenSigner(**signer_kwargs)
         else:
             if 'auth_purpose' in client_config and client_config['auth_purpose'] is not None:
@@ -497,7 +511,14 @@ def build_raw_requests_session(ctx):
         FilePermissionChecker.warn_on_invalid_file_permissions(os.path.expanduser(client_config['key_file']))
 
     if signer is None and config_and_signer.uses_instance_principals_auth:
-        raise click.ClickException('Invalid configuration detected: instance principals authentication is being used without a created signer')
+        raise click.ClickException('ERROR: Instance principals authentication requires a configured signer.\n'
+                                   'To fix this issue:\n'
+                                   '  1. Ensure you are running on an OCI compute instance\n'
+                                   '  2. Verify the instance has proper IAM policies:\n'
+                                   '     Allow dynamic-group <your-dynamic-group> to manage <resources> in compartment <compartment>\n'
+                                   '  3. Check file permissions: oci setup repair-file-permissions\n'
+                                   '  4. If using delegation, ensure delegation_token_file is configured\n'
+                                   'Documentation: https://docs.oracle.com/iaas/Content/API/SDKDocs/cliinstall.htm#configfile')
 
     try:
         if signer is None:
