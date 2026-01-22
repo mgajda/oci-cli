@@ -334,11 +334,26 @@ def find_latest_release_info(ctx, param, value):
         # Raises stored HTTPError, if one occurred.
         response.raise_for_status()
     except requests.exceptions.HTTPError as errh:
-        click.echo(click.style("Unable to access Github. HTTP Error : {}").format(errh))
+        click.echo(click.style("Unable to access GitHub. HTTP Error: {}\n"
+                              "Possible solutions:\n"
+                              "  1. Check your internet connection\n"
+                              "  2. If behind a proxy, set: export HTTPS_PROXY=<proxy_url>\n"
+                              "  3. Try again later if GitHub is experiencing issues\n"
+                              "  4. Check https://githubstatus.com for service status").format(errh))
     except requests.exceptions.ConnectionError as errc:
-        click.echo(click.style("Unable to access Github. Error Connecting: {}").format(errc))
+        click.echo(click.style("Unable to access GitHub. Connection Error: {}\n"
+                              "Possible solutions:\n"
+                              "  1. Check your network connectivity: ping github.com\n"
+                              "  2. Check DNS resolution: nslookup github.com\n"
+                              "  3. If using VPN/proxy, ensure it's configured correctly\n"
+                              "  4. Check firewall settings allow HTTPS (port 443) traffic").format(errc))
     except requests.exceptions.Timeout as errt:
-        click.echo(click.style("Unable to access Github. Timeout Error: {}").format(errt))
+        click.echo(click.style("Unable to access GitHub. Timeout Error: {}\n"
+                              "Possible solutions:\n"
+                              "  1. Increase timeout: --connection-timeout 120\n"
+                              "  2. Check network latency: ping -c 10 github.com\n"
+                              "  3. Try during off-peak hours\n"
+                              "  4. Use a different network connection if available").format(errt))
     except requests.exceptions.RequestException as err:
         click.echo(click.style("Unable to access Github. {}").format(err))
     except Exception as e:
@@ -373,13 +388,28 @@ def find_latest_release_version(ctx, param, value):
         response.raise_for_status()
         latest_version = response.json()['info']['version']
     except requests.exceptions.HTTPError as errh:
-        click.echo(click.style("Unable to access Pypi. HTTP Error : {}").format(errh))
+        click.echo(click.style("Unable to access PyPI. HTTP Error: {}\n"
+                              "Possible solutions:\n"
+                              "  1. Check your internet connection\n"
+                              "  2. If behind a proxy, set: export HTTPS_PROXY=<proxy_url>\n"
+                              "  3. Try using a PyPI mirror: pip install -i https://pypi.douban.com/simple oci-cli\n"
+                              "  4. Check https://status.python.org for PyPI service status").format(errh))
         exit_code = 2
     except requests.exceptions.ConnectionError as errc:
-        click.echo(click.style("Unable to access Pypi. Error Connecting: {}").format(errc))
+        click.echo(click.style("Unable to access PyPI. Connection Error: {}\n"
+                              "Possible solutions:\n"
+                              "  1. Check network connectivity: ping pypi.org\n"
+                              "  2. Check DNS resolution: nslookup pypi.org\n"
+                              "  3. Configure pip proxy: pip config set global.proxy <proxy_url>\n"
+                              "  4. Use offline installation from GitHub releases").format(errc))
         exit_code = 2
     except requests.exceptions.Timeout as errt:
-        click.echo(click.style("Unable to access Pypi. Timeout Error: {}").format(errt))
+        click.echo(click.style("Unable to access PyPI. Timeout Error: {}\n"
+                              "Possible solutions:\n"
+                              "  1. Increase pip timeout: pip install --timeout 120 oci-cli\n"
+                              "  2. Try a different PyPI mirror\n"
+                              "  3. Download wheel directly from https://pypi.org/project/oci-cli/#files\n"
+                              "  4. Use --no-deps if dependency resolution is slow").format(errt))
         exit_code = 2
     except requests.exceptions.RequestException as err:
         click.echo(click.style("Unable to access Pypi. {}").format(err))

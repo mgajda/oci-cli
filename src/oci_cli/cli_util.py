@@ -1007,8 +1007,14 @@ def wrap_exceptions(func):
 
             temp = traceback.format_exc()
             if "SSL: CERTIFICATE_VERIFY_FAILED" in temp:
-                message = "It looks like you are missing some additional certificates for operation. run 'curl request_endpoint' to make sure you are able to call endpoint using curl."
-                troubleshooting_tips = "If you have a root certificate, either use --cert-bundle <path_to_cert_bundle_file> with CLI command or set REQUESTS_CA_BUNDLE env variable. i.e export REQUESTS_CA_BUNDLE=path_to_cert_bundle_file on POSIX-compliant bash-like shell terminal."
+                message = "SSL certificate verification failed. Missing or invalid certificates for the operation."
+                troubleshooting_tips = ("To resolve SSL certificate issues:\n"
+                                      "  1. Test endpoint directly: curl {}\n"
+                                      "  2. Update certificates: pip install -U certifi\n"
+                                      "  3. Use custom cert bundle: --cert-bundle /path/to/ca-bundle.crt\n"
+                                      "  4. Set environment variable: export REQUESTS_CA_BUNDLE=/path/to/ca-bundle.crt\n"
+                                      "  5. For corporate networks, obtain CA certificate from your IT department\n"
+                                      "  6. As a last resort (NOT for production): export PYTHONHTTPSVERIFY=0".format(request_endpoint))
                 raise cli_exceptions.ClientException("SSLException", request_endpoint=request_endpoint, message=message, troubleshooting_tips=troubleshooting_tips)
             else:
                 raise cli_exceptions.ClientException(exception.__class__.__name__,
