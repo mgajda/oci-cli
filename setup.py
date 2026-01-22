@@ -103,6 +103,7 @@ setup_parameters = {
         "License :: OSI Approved :: Apache Software License",
         "License :: OSI Approved :: Universal Permissive License (UPL)",
         "Programming Language :: Python :: 3 :: Only",
+        # Note: Python 3.6 (EOL 2021-12-23) and 3.7 (EOL 2023-06-27) are included for legacy support
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
