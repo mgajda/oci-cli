@@ -944,10 +944,35 @@ def wrap_exceptions(func):
             load_context_obj_values_from_defaults(ctx)
 
             if 'missing_required_parameters' in ctx.obj:
-                raise cli_exceptions.RequiredValueNotInDefaultOrUserInputError('Missing option(s) --{}.'.format(', --'.join(ctx.obj['missing_required_parameters'])))
+                missing_params = ctx.obj['missing_required_parameters']
+                examples = []
+                for param in missing_params[:2]:  # Show examples for first 2 params
+                    if 'compartment-id' in param:
+                        examples.append('  --compartment-id ocid1.compartment.oc1..aaaaa...')
+                    elif 'availability-domain' in param:
+                        examples.append('  --availability-domain AD-1')
+                    else:
+                        examples.append('  --{} <value>'.format(param))
+
+                error_msg = ('Missing required option(s): --{}\n\n'
+                            'Example usage:\n{}\n\n'
+                            'To see all parameters: oci {} --help'.format(
+                                ', --'.join(missing_params),
+                                '\n'.join(examples) if examples else '  oci <service> <resource> <action> --<option> <value>',
+                                ' '.join(ctx.command_path.split()[1:])  # Get command path without 'oci' prefix
+                            ))
+                raise cli_exceptions.RequiredValueNotInDefaultOrUserInputError(error_msg)
 
             if 'missing_internal_parameters' in ctx.obj:
-                raise cli_exceptions.RequiredValueNotAvailableInternallyOrUserInputError('Unable to retrieve namespace internally. Please provide the namespace using the option "--{}".'.format(ctx.obj['missing_internal_parameters']))
+                param = ctx.obj['missing_internal_parameters']
+                error_msg = ('Unable to retrieve namespace internally.\n\n'
+                            'Please provide the namespace explicitly:\n'
+                            '  --{} <your-namespace>\n\n'
+                            'To find your namespace:\n'
+                            '  1. In OCI Console: Menu → Administration → Tenancy Details\n'
+                            '  2. Via CLI: oci os ns get\n'
+                            '  3. From your config: grep namespace ~/.oci/config'.format(param))
+                raise cli_exceptions.RequiredValueNotAvailableInternallyOrUserInputError(error_msg)
 
             # check this AFTER checking for required params
             # if there are missing required params we want to show that notice, not prompt the user for deletion confirmation

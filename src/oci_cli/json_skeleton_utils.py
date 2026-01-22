@@ -67,7 +67,15 @@ def json_skeleton_generation_handler(input_params_to_complex_types={}, output_ty
                 ctx.obj['output_type'] = output_type
 
                 if ctx.obj['generate_full_command_json_input'] and ctx.obj['generate_param_json_input']:
-                    raise click.UsageError("Cannot specify both the --generate-full-command-json-input and --generate-param-json-input parameters")
+                    raise click.UsageError("Cannot specify both JSON generation options simultaneously.\n\n"
+                                         "Choose one:\n"
+                                         "  --generate-full-command-json-input\n"
+                                         "    Generates a complete JSON template for all command parameters\n\n"
+                                         "  --generate-param-json-input <param-name>\n"
+                                         "    Generates a JSON template for a specific complex parameter\n\n"
+                                         "Example:\n"
+                                         "  oci compute instance launch --generate-full-command-json-input\n"
+                                         "  oci compute instance launch --generate-param-json-input metadata")
                 elif ctx.obj['generate_full_command_json_input']:
                     generate_json_skeleton_for_full_command(ctx)
                     sys.exit(0)
