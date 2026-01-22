@@ -8,13 +8,31 @@ so updating those in the future should be easy, it is recommended not to call er
 outside this page, instead call get_error_message function"""
 
 error_messages = {
-    "invalid_input": "Incorrect input:",
-    "missing_required_params": "Error: Missing required parameters",
-    "resource_search_failed": "Error: Resource search failed, please check you are correctly authorized to view resources",
-    "no_items_found": "No items found",
-    "try_again": "Something went wrong. Please try again later",
-    "history_clear": "History cleared",
-    "terminal_too_small": "Terminal is too small. Expand terminal height to see full menu."
+    "invalid_input": "Invalid input. Please use TAB for suggestions, SPACE to select, ENTER to execute.\nFor help: Ctrl-H",
+    "missing_required_params": "Missing required parameters (marked with *).\nUse TAB to see required parameters or type --help for documentation",
+    "resource_search_failed": ("Resource search failed.\n"
+                               "Possible causes:\n"
+                               "  1. Missing IAM policy: Allow group <group> to read <resource> in compartment <compartment>\n"
+                               "  2. Wrong compartment selected\n"
+                               "  3. Resource doesn't exist\n"
+                               "To check policies: oci iam policy list --compartment-id <tenancy-ocid>"),
+    "no_items_found": ("No items found.\n"
+                      "Try:\n"
+                      "  1. Check compartment selection (use --compartment-id)\n"
+                      "  2. Verify filters (remove or adjust --display-name, --lifecycle-state)\n"
+                      "  3. Check region (use --region)\n"
+                      "  4. Ensure resource exists: oci <service> <resource> list --all"),
+    "try_again": ("Operation failed.\n"
+                 "Troubleshooting:\n"
+                 "  1. Check network connectivity\n"
+                 "  2. Verify credentials: oci iam user get --user-id <your-user-ocid>\n"
+                 "  3. Review the last command for syntax errors\n"
+                 "  4. Enable debug mode: export OCI_CLI_DEBUG=1"),
+    "history_clear": "History cleared successfully. Previous commands removed from interactive session.",
+    "terminal_too_small": ("Terminal too small for interactive mode.\n"
+                          "Minimum size: 80 columns x 24 rows\n"
+                          "Current size can be checked with: tput cols && tput lines\n"
+                          "Resize your terminal window and try again.")
 }
 
 
